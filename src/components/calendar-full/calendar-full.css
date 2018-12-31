@@ -1,0 +1,77 @@
+
+body {
+  font-family: Arial;
+  font-size: 14px;
+}
+
+.dates {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.header {
+  display: flex;
+  text-align: center;
+}
+.date-header-tile {
+  flex: 1 1 calc(100%/7 - 2px);
+  border: 1px solid #ddd;
+  padding: 5px;
+  font-size: .7em;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.date-tile > .content {
+  margin: 5px;
+  font-size: .8em;
+}
+
+.date-tile {
+  flex: 1 1 calc(100%/7 - 2px);
+  height: 80px;
+  border: 1px solid #ddd;
+}
+
+.date-tile > .footer {
+  background-color: #eee;
+  font-size: .8em;
+  padding: 2px;
+  position: absolute;
+  width: calc(100%/7 - 8px);
+  margin-top: 64px;
+  height: 12px;
+}
+
+.date-tile.week-end {
+  background-color: #f8f8f8;
+}
+
+.date-tile.selected {
+  background-color: lightblue;
+}
+
+.date-tile.other-month {
+  color: #aaa;
+}
+
+.event-bar {
+  background-color: #eee;
+  padding: 1px 3px;
+  white-space: nowrap;
+  position: absolute;
+  /* width: calc(100%/7*4 - 4*2px - 25px); */
+  margin-top: 2px;
+  border: 1px solid #dadada;
+  border-left: 5px solid grey;
+  overflow: hidden;
+}
+
+.event-bar > .label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.event-bar > .desc {
+  font-size: .9em;
+}

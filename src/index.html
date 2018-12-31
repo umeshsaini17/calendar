@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+  <title>Stencil Component Starter</title>
+  <script src="/build/te-calendar.js"></script>
+
+</head>
+<body>
+  <div>
+    <button onclick="addEvent()">Add Event</button>
+  </div>
+  <te-calendar-full></te-calendar-full>
+
+  <script>
+
+    var calendar = document.querySelector('te-calendar-full');
+    calendar.options = {
+      eventTypeLegends: [
+        {
+          type: 'SickLeave',
+          color: 'red',
+          bgColor: '#ffdddd'
+        },
+        {
+          type: 'EarnedLeave',
+          color: 'green',
+          bgColor: '#ddffdd'
+        }
+      ],
+      weekendDays: [6, 0]
+    };
+    calendar.dateFooters = [
+      {
+        date: new Date('2018/12/12'),
+        innerHtml: '<span>09:00</span><span style="float:right;">17:00</span>'
+      }
+    ];
+
+    calendar.addEventListener('dateSelected', event => {
+      console.log(event);
+    });
+    function addEvent() {
+      calendar.events = [
+        {
+          description: 'test description',
+          type: 'SickLeave',
+          label: 'Sick Leave',
+          startDate: new Date('2018/12/06'),
+          endDate: new Date('2018/12/13')
+        },
+        {
+          description: 'test description',
+          type: 'EarnedLeave',
+          label: 'Earned Leave',
+          startDate: new Date('2018/12/11'),
+          endDate: new Date('2018/12/12')
+        }
+      ];
+    }
+  </script>
+</body>
+</html>
