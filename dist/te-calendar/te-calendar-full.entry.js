@@ -1,5 +1,5 @@
 /*! Built with http://stenciljs.com */
-import { h } from '../te-calendar.core.js';
+const { h } = window.TeCalendar;
 
 var hookCallback;
 
@@ -4502,9 +4502,13 @@ hooks.HTML5_FMT = {
     MONTH: 'YYYY-MM'                                // <input type="month" />
 };
 
+// import { WeekDayType } from '../enums';
 class DateHelper {
     static getMonthDates(date, dateFooters = []) {
+        // debugger;
         let mDate = hooks(date);
+        // let day = <WeekDayType>mDate.day();
+        // let daysCount = mDate.daysInMonth();
         let startDate = hooks(date).startOf('month').day(1);
         let endDate = hooks(date).endOf('month').day(7);
         let month = mDate.month();
@@ -4538,7 +4542,7 @@ class DateHelper {
         }
         return dates;
     }
-    static getDateCount(startDate, endDate) {
+    static getDateCount(startDate, endDate /*, fromDate: Date*/) {
         const startDay = hooks(startDate);
         const splitDay = hooks(startDate).day(7);
         const endDay = hooks(endDate);
@@ -4601,6 +4605,21 @@ var WeekDayType;
     WeekDayType[WeekDayType["Sunday"] = 0] = "Sunday";
 })(WeekDayType || (WeekDayType = {}));
 
+class EventHelper {
+    static getDateEvents(date, events, limit = 3) {
+        let dateEvents = events.filter(e => DateHelper.isLessThenOrEqual(e.startDate, date) && DateHelper.isLessThenOrEqual(date, e.endDate))
+            .sort((x, y) => DateHelper.isLessThenOrEqual(x.startDate, y.startDate) ? -1 : 1)
+            .map((x, i) => {
+            return Object.assign({}, x, { offset: (i * 17 + 1) + 'px', ispreviousDayEvent: !DateHelper.areDatesEqual(date, x.startDate), isMonday: DateHelper.getWeekDay(date) === WeekDayType.Monday });
+        });
+        return dateEvents.splice(0, limit);
+    }
+    static getDateExtendedEventsCount(date, events, limit = 3) {
+        let eventsCount = events.filter(e => DateHelper.isLessThenOrEqual(e.startDate, date) && DateHelper.isLessThenOrEqual(date, e.endDate)).length;
+        return eventsCount - limit;
+    }
+}
+
 class CalendarFull {
     constructor() {
         this.dateFooters = [];
@@ -4612,6 +4631,7 @@ class CalendarFull {
         this.endCalendarDate = null;
     }
     componentWillLoad() {
+        // this.initializeOptions(this.options);
         this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
         let days = hooks.weekdays(true);
         days.push(days.shift());
@@ -4628,27 +4648,8 @@ class CalendarFull {
     optionsChanged(newVal) {
         this.initializeOptions(newVal);
     }
-    calendarDatesChanged() {
-    }
-    dateFootersChanged(newVal) {
-        console.log(newVal);
-    }
-    eventsChanged(newVal) {
-        newVal.forEach(e => {
-            let d = this.calendarDates.find(cd => DateHelper.areDatesEqual(cd.date, e.startDate));
-            if (d) {
-                d.events.push(e);
-                let startDate = new Date(e.startDate.getTime());
-                while (DateHelper.isCarryToNextWeek(startDate, e.endDate)) {
-                    let mon = DateHelper.getNextMonday(startDate);
-                    let cdMon = this.calendarDates.find(d => DateHelper.areDatesEqual(d.date, mon));
-                    if (cdMon) {
-                        cdMon.events.push(e);
-                    }
-                    startDate = mon;
-                }
-            }
-        });
+    eventsChanged() {
+        this.calendarDates = this.calendarDates.map(x => Object.assign(x, { isSelected: false }));
     }
     dateClicked(date) {
         this.calendarDates.forEach(x => {
@@ -4656,6 +4657,7 @@ class CalendarFull {
                 x.isSelected = !x.isSelected;
                 this.startCalendarDate = this.endCalendarDate = x;
                 if (x.isSelected) {
+                    console.log('dateClicked - ' + x.date);
                     this.dateSelected.emit({ startDate: x.date, endDate: x.date });
                 }
             }
@@ -4701,6 +4703,7 @@ class CalendarFull {
         let first = selectedDates.shift();
         let last = selectedDates.pop();
         if (first && last) {
+            console.log('dragEnd - ' + first.date);
             this.dateSelected.emit({ startDate: first.date, endDate: last.date });
         }
     }
@@ -4709,6 +4712,9 @@ class CalendarFull {
             + (cd.isSelected ? ' selected' : '')
             + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
     }
+    getEventsLimit() {
+        return this.dateFooters && this.dateFooters.length ? 3 : 4;
+    }
     render() {
         return (h("div", null,
             h("div", { class: "header" }, this.weekDays.map(wd => {
@@ -4716,18 +4722,29 @@ class CalendarFull {
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
                 return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
+                    (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
+                        h("div", { class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
+                            h("a", { href: "#" },
+                                "+",
+                                EventHelper.getDateExtendedEventsCount(cd.date, this.events),
+                                " more"))
+                        : '',
                     cd.footerHtml ?
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
                     h("div", { class: "content" },
                         h("div", null, cd.text),
-                        cd.events.map(e => {
+                        EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                            if (e.ispreviousDayEvent && !e.isMonday) {
+                                return '';
+                            }
                             let diff = DateHelper.getDateCount(cd.date, e.endDate);
                             let legend = this.options.eventTypeLegends.find(etl => etl.type === e.type);
                             return (h("div", { class: "event-bar", onClick: (evt) => { this.eventClicked(evt, e); }, style: {
                                     width: 'calc(100%/7*' + diff + ' - ' + diff + '*2px - 25px)',
                                     borderLeftColor: (legend ? legend.color : ''),
-                                    backgroundColor: (legend ? legend.bgColor : '')
+                                    backgroundColor: (legend ? legend.bgColor : ''),
+                                    marginTop: e.offset
                                 } },
                                 h("span", { class: "label" }, e.label),
                                 h("span", { class: "desc" }, e.description)));
@@ -4737,8 +4754,7 @@ class CalendarFull {
     static get is() { return "te-calendar-full"; }
     static get properties() { return {
         "calendarDates": {
-            "state": true,
-            "watchCallbacks": ["calendarDatesChanged"]
+            "state": true
         },
         "currentMonth": {
             "type": "Any",
@@ -4746,8 +4762,7 @@ class CalendarFull {
         },
         "dateFooters": {
             "type": "Any",
-            "attr": "date-footers",
-            "watchCallbacks": ["dateFootersChanged"]
+            "attr": "date-footers"
         },
         "endCalendarDate": {
             "state": true
@@ -4780,7 +4795,7 @@ class CalendarFull {
             "cancelable": true,
             "composed": true
         }]; }
-    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.content{margin:5px;font-size:.8em}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:80px;border:1px solid #ddd}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:64px;height:12px}.date-tile.week-end{background-color:#f8f8f8}.date-tile.selected{background-color:#add8e6}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:2px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}"; }
+    static get style() { return "body {\n  font-family: Arial;\n  font-size: 14px;\n}\n\n.dates {\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-flow: row wrap;\n  flex-flow: row wrap;\n}\n\n.header {\n  display: -ms-flexbox;\n  display: flex;\n  text-align: center;\n}\n.date-header-tile {\n  -ms-flex: 1 1 calc(100%/7 - 2px);\n  flex: 1 1 calc(100%/7 - 2px);\n  border: 1px solid #ddd;\n  padding: 5px;\n  font-size: .7em;\n  text-transform: uppercase;\n  font-weight: bold;\n}\n\n.date-tile > .content {\n  margin: 5px;\n  font-size: .8em;\n}\n\n.date-tile {\n  -ms-flex: 1 1 calc(100%/7 - 2px);\n  flex: 1 1 calc(100%/7 - 2px);\n  height: 100px;\n  border: 1px solid #ddd;\n}\n\n.date-tile > .footer {\n  background-color: #eee;\n  font-size: .8em;\n  padding: 2px;\n  position: absolute;\n  width: calc(100%/7 - 8px);\n  margin-top: 84px;\n  height: 12px;\n}\n\n.date-tile.week-end {\n  background-color: #f8f8f8;\n}\n\n.date-tile.selected {\n  background-color: lightblue;\n}\n\n.date-tile.other-month {\n  color: #aaa;\n}\n\n.event-bar {\n  background-color: #eee;\n  padding: 1px 3px;\n  white-space: nowrap;\n  position: absolute;\n  /* width: calc(100%/7*4 - 4*2px - 25px); */\n  margin-top: 1px;\n  border: 1px solid #dadada;\n  border-left: 5px solid grey;\n  overflow: hidden;\n  cursor: pointer;\n  text-overflow: ellipsis;\n}\n\n.event-bar > .label {\n  font-weight: bold;\n  margin-right: 5px;\n}\n\n.event-bar > .desc {\n  font-size: .9em;\n}\n\n.more-bar {\n  font-size: .8em;\n  padding: 2px;\n  position: absolute;\n  width: calc(100%/7 - 8px);\n  margin-top: 84px;\n  height: 12px;\n}\n\n.more-bar > a:visited, .more-bar > a:hover, .more-bar > a:active {\n  color: blue;\n}\n.more-bar > a {\n  text-decoration: none;\n  font-weight: bold;\n  color: blue;\n}\n\n.more-bar.hasFooter {\n  margin-top: 68px;\n}"; }
 }
 
 export { CalendarFull as TeCalendarFull };

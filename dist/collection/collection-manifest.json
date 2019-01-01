@@ -19,10 +19,7 @@
         },
         {
           "name": "dateFooters",
-          "attr": "date-footers",
-          "watch": [
-            "dateFootersChanged"
-          ]
+          "attr": "date-footers"
         },
         {
           "name": "events",

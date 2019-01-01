@@ -4,6 +4,7 @@ import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
 import { IEvent } from '../../models/event.model';
 import { WeekDayType } from '../../enums';
+import { EventHelper } from '../../utils/event.helper';
 
 @Component({
   tag: 'te-calendar-full',
@@ -25,11 +26,6 @@ export class CalendarFull {
   @Event() dateSelected: EventEmitter<DateChangedEvent>;
   @Event() eventSelected: EventEmitter<EventClickedEvent>;
 
-  // @Listen('dateSelected')
-  // dateSelectedHandler(event: CustomEvent) {
-
-  // }
-
   componentWillLoad() {
     // this.initializeOptions(this.options);
     this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
@@ -50,37 +46,11 @@ export class CalendarFull {
   @Watch('options')
   optionsChanged(newVal: ICalendarOptions) {
     this.initializeOptions(newVal);
-    // console.log(newVal);
-  }
-
-  @Watch('calendarDates')
-  calendarDatesChanged(/*newVal: Array<ICalendarDate>*/) {
-    // console.log(newVal);
-  }
-
-  @Watch('dateFooters')
-  dateFootersChanged(newVal: Array<ICalendarDate>) {
-    console.log(newVal);
   }
 
   @Watch('events')
-  eventsChanged(newVal: Array<IEvent>) {
-    newVal.forEach(e => {
-      let d = this.calendarDates.find(cd => DateHelper.areDatesEqual(cd.date, e.startDate));
-      if (d) {
-        //TODO: If already available event, then update.
-        d.events.push(e);
-        let startDate = new Date(e.startDate.getTime());
-        while (DateHelper.isCarryToNextWeek(startDate, e.endDate)) {
-          let mon = DateHelper.getNextMonday(startDate);
-          let cdMon = this.calendarDates.find(d => DateHelper.areDatesEqual(d.date, mon));
-          if (cdMon) {
-            cdMon.events.push(e);
-          }
-          startDate = mon;
-        }
-      }
-    })
+  eventsChanged() {
+    this.calendarDates = this.calendarDates.map(x=> Object.assign(x, {isSelected: false}));
   }
 
   dateClicked(date: ICalendarDate) {
@@ -89,6 +59,7 @@ export class CalendarFull {
         x.isSelected = !x.isSelected;
         this.startCalendarDate = this.endCalendarDate = x;
         if (x.isSelected) {
+          console.log('dateClicked - ' + x.date);
           this.dateSelected.emit({ startDate: x.date, endDate: x.date });
         }
       } else if (!this.options.allowMultiRangeSelect) {
@@ -139,6 +110,7 @@ export class CalendarFull {
     let first = selectedDates.shift();
     let last = selectedDates.pop();
     if (first && last) {
+      console.log('dragEnd - ' + first.date);
       this.dateSelected.emit({ startDate: first.date, endDate: last.date });
     }
   }
@@ -149,10 +121,9 @@ export class CalendarFull {
       + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
   }
 
-  // dragEnter(e) {
-  //   console.log(e);
-  // }
-
+  getEventsLimit() {
+    return this.dateFooters && this.dateFooters.length ? 3 : 4;
+  }
   render() {
     return (
       <div>
@@ -170,6 +141,10 @@ export class CalendarFull {
                   onDragOver={(e) => this.dragOver(e, cd)}
                   onDragStart={(e) => this.dragStart(e, cd)}
                   onDragEnd={() => this.dragEnd()}>
+                  {(EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
+                    <div class={'more-bar' + (cd.footerHtml ? ' hasFooter' : '')}><a href="#">+{EventHelper.getDateExtendedEventsCount(cd.date, this.events)} more</a></div>
+                    : ''
+                  }
                   {cd.footerHtml ?
                     <div class="footer" innerHTML={cd.footerHtml}>
                     </div>
@@ -177,14 +152,18 @@ export class CalendarFull {
                   }
                   <div class="content">
                     <div>{cd.text}</div>
-                    {cd.events.map(e => {
+                    {EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                      if(e.ispreviousDayEvent && !e.isMonday) {
+                        return '';
+                      }
                       let diff = DateHelper.getDateCount(cd.date, e.endDate);
                       let legend = this.options.eventTypeLegends.find(etl => etl.type === e.type);
                       return (
                         <div class="event-bar" onClick={(evt) => { this.eventClicked(evt, e) }} style={{
                           width: 'calc(100%/7*' + diff + ' - ' + diff + '*2px - 25px)',
                           borderLeftColor: (legend ? legend.color : ''),
-                          backgroundColor: (legend ? legend.bgColor : '')
+                          backgroundColor: (legend ? legend.bgColor : ''),
+                          marginTop: e.offset
                         }}>
                           <span class="label">{e.label}</span>
                           <span class="desc">{e.description}</span>

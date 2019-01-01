@@ -16,14 +16,13 @@ export declare class CalendarFull {
     componentWillLoad(): void;
     initializeOptions(options: ICalendarOptions): void;
     optionsChanged(newVal: ICalendarOptions): void;
-    calendarDatesChanged(): void;
-    dateFootersChanged(newVal: Array<ICalendarDate>): void;
-    eventsChanged(newVal: Array<IEvent>): void;
+    eventsChanged(): void;
     dateClicked(date: ICalendarDate): void;
     eventClicked(evt: MouseEvent, event: IEvent): void;
     dragStart(e: any, cd: ICalendarDate): void;
     dragOver(e: any, cd: ICalendarDate): void;
     dragEnd(): void;
     tileStyle(cd: ICalendarDate): string;
+    getEventsLimit(): 3 | 4;
     render(): JSX.Element;
 }

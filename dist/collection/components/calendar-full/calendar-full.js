@@ -1,6 +1,7 @@
 import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
 import { WeekDayType } from '../../enums';
+import { EventHelper } from '../../utils/event.helper';
 export class CalendarFull {
     constructor() {
         this.dateFooters = [];
@@ -12,6 +13,7 @@ export class CalendarFull {
         this.endCalendarDate = null;
     }
     componentWillLoad() {
+        // this.initializeOptions(this.options);
         this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
         let days = moment.weekdays(true);
         days.push(days.shift());
@@ -28,27 +30,8 @@ export class CalendarFull {
     optionsChanged(newVal) {
         this.initializeOptions(newVal);
     }
-    calendarDatesChanged() {
-    }
-    dateFootersChanged(newVal) {
-        console.log(newVal);
-    }
-    eventsChanged(newVal) {
-        newVal.forEach(e => {
-            let d = this.calendarDates.find(cd => DateHelper.areDatesEqual(cd.date, e.startDate));
-            if (d) {
-                d.events.push(e);
-                let startDate = new Date(e.startDate.getTime());
-                while (DateHelper.isCarryToNextWeek(startDate, e.endDate)) {
-                    let mon = DateHelper.getNextMonday(startDate);
-                    let cdMon = this.calendarDates.find(d => DateHelper.areDatesEqual(d.date, mon));
-                    if (cdMon) {
-                        cdMon.events.push(e);
-                    }
-                    startDate = mon;
-                }
-            }
-        });
+    eventsChanged() {
+        this.calendarDates = this.calendarDates.map(x => Object.assign(x, { isSelected: false }));
     }
     dateClicked(date) {
         this.calendarDates.forEach(x => {
@@ -56,6 +39,7 @@ export class CalendarFull {
                 x.isSelected = !x.isSelected;
                 this.startCalendarDate = this.endCalendarDate = x;
                 if (x.isSelected) {
+                    console.log('dateClicked - ' + x.date);
                     this.dateSelected.emit({ startDate: x.date, endDate: x.date });
                 }
             }
@@ -101,6 +85,7 @@ export class CalendarFull {
         let first = selectedDates.shift();
         let last = selectedDates.pop();
         if (first && last) {
+            console.log('dragEnd - ' + first.date);
             this.dateSelected.emit({ startDate: first.date, endDate: last.date });
         }
     }
@@ -109,6 +94,9 @@ export class CalendarFull {
             + (cd.isSelected ? ' selected' : '')
             + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
     }
+    getEventsLimit() {
+        return this.dateFooters && this.dateFooters.length ? 3 : 4;
+    }
     render() {
         return (h("div", null,
             h("div", { class: "header" }, this.weekDays.map(wd => {
@@ -116,18 +104,29 @@ export class CalendarFull {
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
                 return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
+                    (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
+                        h("div", { class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
+                            h("a", { href: "#" },
+                                "+",
+                                EventHelper.getDateExtendedEventsCount(cd.date, this.events),
+                                " more"))
+                        : '',
                     cd.footerHtml ?
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
                     h("div", { class: "content" },
                         h("div", null, cd.text),
-                        cd.events.map(e => {
+                        EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                            if (e.ispreviousDayEvent && !e.isMonday) {
+                                return '';
+                            }
                             let diff = DateHelper.getDateCount(cd.date, e.endDate);
                             let legend = this.options.eventTypeLegends.find(etl => etl.type === e.type);
                             return (h("div", { class: "event-bar", onClick: (evt) => { this.eventClicked(evt, e); }, style: {
                                     width: 'calc(100%/7*' + diff + ' - ' + diff + '*2px - 25px)',
                                     borderLeftColor: (legend ? legend.color : ''),
-                                    backgroundColor: (legend ? legend.bgColor : '')
+                                    backgroundColor: (legend ? legend.bgColor : ''),
+                                    marginTop: e.offset
                                 } },
                                 h("span", { class: "label" }, e.label),
                                 h("span", { class: "desc" }, e.description)));
@@ -137,8 +136,7 @@ export class CalendarFull {
     static get is() { return "te-calendar-full"; }
     static get properties() { return {
         "calendarDates": {
-            "state": true,
-            "watchCallbacks": ["calendarDatesChanged"]
+            "state": true
         },
         "currentMonth": {
             "type": "Any",
@@ -146,8 +144,7 @@ export class CalendarFull {
         },
         "dateFooters": {
             "type": "Any",
-            "attr": "date-footers",
-            "watchCallbacks": ["dateFootersChanged"]
+            "attr": "date-footers"
         },
         "endCalendarDate": {
             "state": true

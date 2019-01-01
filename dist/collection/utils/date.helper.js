@@ -1,7 +1,11 @@
 import moment from 'moment';
+// import { WeekDayType } from '../enums';
 export class DateHelper {
     static getMonthDates(date, dateFooters = []) {
+        // debugger;
         let mDate = moment(date);
+        // let day = <WeekDayType>mDate.day();
+        // let daysCount = mDate.daysInMonth();
         let startDate = moment(date).startOf('month').day(1);
         let endDate = moment(date).endOf('month').day(7);
         let month = mDate.month();
@@ -35,7 +39,7 @@ export class DateHelper {
         }
         return dates;
     }
-    static getDateCount(startDate, endDate) {
+    static getDateCount(startDate, endDate /*, fromDate: Date*/) {
         const startDay = moment(startDate);
         const splitDay = moment(startDate).day(7);
         const endDay = moment(endDate);
