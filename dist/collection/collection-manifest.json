@@ -1,0 +1,71 @@
+{
+  "components": [
+    {
+      "tag": "te-calendar-full",
+      "dependencies": [],
+      "componentClass": "CalendarFull",
+      "componentPath": "components/calendar-full/calendar-full.js",
+      "styles": {
+        "$": {
+          "stylePaths": [
+            "components/calendar-full/calendar-full.css"
+          ]
+        }
+      },
+      "props": [
+        {
+          "name": "currentMonth",
+          "attr": "current-month"
+        },
+        {
+          "name": "dateFooters",
+          "attr": "date-footers",
+          "watch": [
+            "dateFootersChanged"
+          ]
+        },
+        {
+          "name": "events",
+          "attr": "events",
+          "watch": [
+            "eventsChanged"
+          ]
+        },
+        {
+          "name": "options",
+          "mutable": true,
+          "attr": "options",
+          "watch": [
+            "optionsChanged"
+          ]
+        }
+      ],
+      "states": [
+        {
+          "name": "calendarDates"
+        },
+        {
+          "name": "endCalendarDate"
+        },
+        {
+          "name": "startCalendarDate"
+        }
+      ],
+      "events": [
+        {
+          "event": "dateSelected"
+        },
+        {
+          "event": "eventSelected"
+        }
+      ]
+    }
+  ],
+  "collections": [],
+  "compiler": {
+    "name": "@stencil/core",
+    "version": "0.15.2",
+    "typescriptVersion": "2.9.2"
+  },
+  "bundles": []
+}

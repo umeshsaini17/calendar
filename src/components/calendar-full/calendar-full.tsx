@@ -1,5 +1,5 @@
 import { Component, State, Watch, Prop, Event, EventEmitter } from '@stencil/core';
-import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter } from '../../models';
+import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent } from '../../models';
 import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
 import { IEvent } from '../../models/event.model';
@@ -12,9 +12,10 @@ import { WeekDayType } from '../../enums';
 })
 export class CalendarFull {
 
-  @Prop({ mutable: true }) dateFooters: Array<IDateFooter> = [];
-  @Prop({ mutable: true }) events: Array<IEvent> = [];
+  @Prop() dateFooters: Array<IDateFooter> = [];
+  @Prop() events: Array<IEvent> = [];
   @Prop({ mutable: true }) options: ICalendarOptions = {};
+  @Prop() currentMonth: Date = new Date();
   @State() calendarDates: Array<ICalendarDate> = [];
   weekDays: Array<string>;
 
@@ -22,6 +23,7 @@ export class CalendarFull {
   @State() endCalendarDate: ICalendarDate = null;
 
   @Event() dateSelected: EventEmitter<DateChangedEvent>;
+  @Event() eventSelected: EventEmitter<EventClickedEvent>;
 
   // @Listen('dateSelected')
   // dateSelectedHandler(event: CustomEvent) {
@@ -30,8 +32,7 @@ export class CalendarFull {
 
   componentWillLoad() {
     // this.initializeOptions(this.options);
-    console.log(this.dateFooters);
-    this.calendarDates = DateHelper.getMonthDates(new Date(), this.dateFooters);
+    this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
     let days = moment.weekdays(true)
     days.push(days.shift());
     this.weekDays = days;
@@ -47,7 +48,7 @@ export class CalendarFull {
   }
 
   @Watch('options')
-  optionsChanged(newVal: ICalendarOptions) { 
+  optionsChanged(newVal: ICalendarOptions) {
     this.initializeOptions(newVal);
     // console.log(newVal);
   }
@@ -87,8 +88,8 @@ export class CalendarFull {
       if (DateHelper.areDatesEqual(x.date, date.date)) {
         x.isSelected = !x.isSelected;
         this.startCalendarDate = this.endCalendarDate = x;
-        if(x.isSelected) {
-          this.dateSelected.emit({startDate: x.date, endDate: x.date});
+        if (x.isSelected) {
+          this.dateSelected.emit({ startDate: x.date, endDate: x.date });
         }
       } else if (!this.options.allowMultiRangeSelect) {
         x.isSelected = false;
@@ -96,6 +97,11 @@ export class CalendarFull {
       }
     });
     this.calendarDates = [... this.calendarDates];
+  }
+
+  eventClicked(evt: MouseEvent, event: IEvent) {
+    evt.stopPropagation();
+    this.eventSelected.emit({ event });
   }
 
   dragStart(e, cd: ICalendarDate) {
@@ -129,19 +135,18 @@ export class CalendarFull {
   }
 
   dragEnd() {
-    console.log('drag end');
-    let selectedDates = this.calendarDates.filter(x=>x.isSelected).sort((x,y) => DateHelper.isLessThenOrEqual(x.date, y.date) ? -1 : 1);
+    let selectedDates = this.calendarDates.filter(x => x.isSelected).sort((x, y) => DateHelper.isLessThenOrEqual(x.date, y.date) ? -1 : 1);
     let first = selectedDates.shift();
     let last = selectedDates.pop();
-    if(first && last) {
-      this.dateSelected.emit({startDate: first.date, endDate: last.date});
+    if (first && last) {
+      this.dateSelected.emit({ startDate: first.date, endDate: last.date });
     }
   }
 
   tileStyle(cd: ICalendarDate) {
-    return 'date-tile' + ((!cd.isCurrentMonth) ? ' other-month' : '') 
-    + (cd.isSelected ? ' selected' : '') 
-    + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >=0 ? ' week-end' : '');
+    return 'date-tile' + ((!cd.isCurrentMonth) ? ' other-month' : '')
+      + (cd.isSelected ? ' selected' : '')
+      + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
   }
 
   // dragEnter(e) {
@@ -164,7 +169,7 @@ export class CalendarFull {
                   onClick={() => this.dateClicked(cd)}
                   onDragOver={(e) => this.dragOver(e, cd)}
                   onDragStart={(e) => this.dragStart(e, cd)}
-                  onDragEnd={()=> this.dragEnd()}>
+                  onDragEnd={() => this.dragEnd()}>
                   {cd.footerHtml ?
                     <div class="footer" innerHTML={cd.footerHtml}>
                     </div>
@@ -176,10 +181,11 @@ export class CalendarFull {
                       let diff = DateHelper.getDateCount(cd.date, e.endDate);
                       let legend = this.options.eventTypeLegends.find(etl => etl.type === e.type);
                       return (
-                        <div class="event-bar" style={{ 
-                          width: 'calc(100%/7*' + diff + ' - ' + diff + '*2px - 25px)', 
+                        <div class="event-bar" onClick={(evt) => { this.eventClicked(evt, e) }} style={{
+                          width: 'calc(100%/7*' + diff + ' - ' + diff + '*2px - 25px)',
                           borderLeftColor: (legend ? legend.color : ''),
-                          backgroundColor: (legend ? legend.bgColor : '') }}>
+                          backgroundColor: (legend ? legend.bgColor : '')
+                        }}>
                           <span class="label">{e.label}</span>
                           <span class="desc">{e.description}</span>
                         </div>

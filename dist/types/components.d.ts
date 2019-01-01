@@ -5,7 +5,7 @@
  */
 
 
-import '@stencil/core';
+import './stencil.core';
 
 
 import {
@@ -19,7 +19,7 @@ import {
 } from './models/event.model';
 import {
   EventEmitter,
-} from '@stencil/core';
+} from './stencil.core';
 
 
 export namespace Components {
@@ -64,13 +64,5 @@ declare global {
     'te-calendar-full': HTMLTeCalendarFullElement;
   }
 
-
-  export namespace JSX {
-    export interface Element {}
-    export interface IntrinsicElements extends StencilIntrinsicElements {
-      [tagName: string]: any;
-    }
-  }
-  export interface HTMLAttributes extends StencilHTMLAttributes {}
 
 }

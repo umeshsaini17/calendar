@@ -1,7 +1,7 @@
 {
   "name": "calendar",
   "version": "0.0.1",
-  "description": "Stencil Component Starter",
+  "description": "Full calendar components with events management.",
   "module": "dist/esm/index.js",
   "main": "dist/index.js",
   "unpkg": "dist/ionic.js",
