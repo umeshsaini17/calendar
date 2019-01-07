@@ -47,8 +47,14 @@ body {
   background-color: #f8f8f8;
 }
 
+.date-tile.today {
+  background-color: rgb(230, 242, 255);
+  color: rgb(0,93,186);
+}
+
 .date-tile.selected {
-  background-color: lightblue;
+  background-color: rgb(0,93,186);
+  color: #fff;
 }
 
 .date-tile.other-month {

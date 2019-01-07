@@ -1,5 +1,5 @@
 /*! Built with http://stenciljs.com */
-const { h } = window.TeCalendar;
+import { h } from '../te-calendar.core.js';
 
 var hookCallback;
 
@@ -4502,13 +4502,9 @@ hooks.HTML5_FMT = {
     MONTH: 'YYYY-MM'                                // <input type="month" />
 };
 
-// import { WeekDayType } from '../enums';
 class DateHelper {
     static getMonthDates(date, dateFooters = []) {
-        // debugger;
         let mDate = hooks(date);
-        // let day = <WeekDayType>mDate.day();
-        // let daysCount = mDate.daysInMonth();
         let startDate = hooks(date).startOf('month').day(1);
         let endDate = hooks(date).endOf('month').day(7);
         let month = mDate.month();
@@ -4542,7 +4538,7 @@ class DateHelper {
         }
         return dates;
     }
-    static getDateCount(startDate, endDate /*, fromDate: Date*/) {
+    static getDateCount(startDate, endDate) {
         const startDay = hooks(startDate);
         const splitDay = hooks(startDate).day(7);
         const endDay = hooks(endDate);
@@ -4631,7 +4627,6 @@ class CalendarFull {
         this.endCalendarDate = null;
     }
     componentWillLoad() {
-        // this.initializeOptions(this.options);
         this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
         let days = hooks.weekdays(true);
         days.push(days.shift());
@@ -4672,6 +4667,10 @@ class CalendarFull {
         evt.stopPropagation();
         this.eventSelected.emit({ event });
     }
+    moreEventsClickedHandler(evt, date, events) {
+        evt.stopPropagation();
+        this.moreEventsClicked.emit({ events, date });
+    }
     dragStart(e, cd) {
         this.startCalendarDate = cd;
         var dragImgEl = document.createElement('span');
@@ -4709,6 +4708,7 @@ class CalendarFull {
     }
     tileStyle(cd) {
         return 'date-tile' + ((!cd.isCurrentMonth) ? ' other-month' : '')
+            + ((DateHelper.areDatesEqual(cd.date, new Date())) ? ' today' : '')
             + (cd.isSelected ? ' selected' : '')
             + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
     }
@@ -4721,9 +4721,10 @@ class CalendarFull {
                 return h("div", { class: "date-header-tile" }, wd);
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
+                let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
                 return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
                     (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
-                        h("div", { class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
+                        h("div", { onClick: (e) => this.moreEventsClickedHandler(e, cd.date, dateEvents), class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
                             h("a", { href: "#" },
                                 "+",
                                 EventHelper.getDateExtendedEventsCount(cd.date, this.events),
@@ -4733,8 +4734,8 @@ class CalendarFull {
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
                     h("div", { class: "content" },
-                        h("div", null, cd.text),
-                        EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                        h("div", { class: "tile-text" }, cd.text),
+                        dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {
                                 return '';
                             }
@@ -4794,8 +4795,14 @@ class CalendarFull {
             "bubbles": true,
             "cancelable": true,
             "composed": true
+        }, {
+            "name": "moreEventsClicked",
+            "method": "moreEventsClicked",
+            "bubbles": true,
+            "cancelable": true,
+            "composed": true
         }]; }
-    static get style() { return "body {\n  font-family: Arial;\n  font-size: 14px;\n}\n\n.dates {\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-flow: row wrap;\n  flex-flow: row wrap;\n}\n\n.header {\n  display: -ms-flexbox;\n  display: flex;\n  text-align: center;\n}\n.date-header-tile {\n  -ms-flex: 1 1 calc(100%/7 - 2px);\n  flex: 1 1 calc(100%/7 - 2px);\n  border: 1px solid #ddd;\n  padding: 5px;\n  font-size: .7em;\n  text-transform: uppercase;\n  font-weight: bold;\n}\n\n.date-tile > .content {\n  margin: 5px;\n  font-size: .8em;\n}\n\n.date-tile {\n  -ms-flex: 1 1 calc(100%/7 - 2px);\n  flex: 1 1 calc(100%/7 - 2px);\n  height: 100px;\n  border: 1px solid #ddd;\n}\n\n.date-tile > .footer {\n  background-color: #eee;\n  font-size: .8em;\n  padding: 2px;\n  position: absolute;\n  width: calc(100%/7 - 8px);\n  margin-top: 84px;\n  height: 12px;\n}\n\n.date-tile.week-end {\n  background-color: #f8f8f8;\n}\n\n.date-tile.selected {\n  background-color: lightblue;\n}\n\n.date-tile.other-month {\n  color: #aaa;\n}\n\n.event-bar {\n  background-color: #eee;\n  padding: 1px 3px;\n  white-space: nowrap;\n  position: absolute;\n  /* width: calc(100%/7*4 - 4*2px - 25px); */\n  margin-top: 1px;\n  border: 1px solid #dadada;\n  border-left: 5px solid grey;\n  overflow: hidden;\n  cursor: pointer;\n  text-overflow: ellipsis;\n}\n\n.event-bar > .label {\n  font-weight: bold;\n  margin-right: 5px;\n}\n\n.event-bar > .desc {\n  font-size: .9em;\n}\n\n.more-bar {\n  font-size: .8em;\n  padding: 2px;\n  position: absolute;\n  width: calc(100%/7 - 8px);\n  margin-top: 84px;\n  height: 12px;\n}\n\n.more-bar > a:visited, .more-bar > a:hover, .more-bar > a:active {\n  color: blue;\n}\n.more-bar > a {\n  text-decoration: none;\n  font-weight: bold;\n  color: blue;\n}\n\n.more-bar.hasFooter {\n  margin-top: 68px;\n}"; }
+    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.content{margin:5px;font-size:.8em}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:100px;border:1px solid #ddd}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.date-tile.week-end{background-color:#f8f8f8}.date-tile.today{background-color:#e6f2ff;color:#005dba}.date-tile.selected{background-color:#005dba;color:#fff}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:1px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer;text-overflow:ellipsis}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}.more-bar{font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.more-bar>a:active,.more-bar>a:hover,.more-bar>a:visited{color:#00f}.more-bar>a{text-decoration:none;font-weight:700;color:#00f}.more-bar.hasFooter{margin-top:68px}"; }
 }
 
 export { CalendarFull as TeCalendarFull };

@@ -54,6 +54,9 @@
         },
         {
           "event": "eventSelected"
+        },
+        {
+          "event": "moreEventsClicked"
         }
       ]
     }

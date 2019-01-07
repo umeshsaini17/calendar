@@ -17,10 +17,11 @@
 
 ## Events
 
-| Event           | Detail            | Description |
-| --------------- | ----------------- | ----------- |
-| `dateSelected`  | DateChangedEvent  |             |
-| `eventSelected` | EventClickedEvent |             |
+| Event               | Detail                 | Description |
+| ------------------- | ---------------------- | ----------- |
+| `dateSelected`      | DateChangedEvent       |             |
+| `eventSelected`     | EventClickedEvent      |             |
+| `moreEventsClicked` | MoreEventsClickedEvent |             |
 
 
 ----------------------------------------------

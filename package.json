@@ -1,6 +1,6 @@
 {
-  "name": "calendar",
-  "version": "0.0.1",
+  "name": "@3eq/calendar",
+  "version": "1.0.3",
   "description": "Full calendar components with events management.",
   "module": "dist/esm/index.js",
   "main": "dist/index.js",
@@ -21,6 +21,9 @@
   },
   "devDependencies": {
     "@stencil/core": "~0.15.2"
+  },
+  "author": {
+    "name": "Umesh Saini"
   },
   "license": "MIT"
 }

@@ -5,3 +5,4 @@ export * from './event.model';
 export * from './date-changed-event.model';
 export * from './date-footer.model';
 export * from './event-clicked-event.model';
+export * from './more-events-clicked-event.model';

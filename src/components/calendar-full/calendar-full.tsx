@@ -1,5 +1,5 @@
 import { Component, State, Watch, Prop, Event, EventEmitter } from '@stencil/core';
-import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent } from '../../models';
+import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent } from '../../models';
 import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
 import { IEvent } from '../../models/event.model';
@@ -25,6 +25,7 @@ export class CalendarFull {
 
   @Event() dateSelected: EventEmitter<DateChangedEvent>;
   @Event() eventSelected: EventEmitter<EventClickedEvent>;
+  @Event() moreEventsClicked: EventEmitter<MoreEventsClickedEvent>;
 
   componentWillLoad() {
     // this.initializeOptions(this.options);
@@ -75,6 +76,11 @@ export class CalendarFull {
     this.eventSelected.emit({ event });
   }
 
+  moreEventsClickedHandler(evt: MouseEvent, date: Date, events: Array<IEvent>) {
+    evt.stopPropagation();
+    this.moreEventsClicked.emit({ events, date });
+  }
+
   dragStart(e, cd: ICalendarDate) {
     this.startCalendarDate = cd;
     var dragImgEl = document.createElement('span');
@@ -117,6 +123,7 @@ export class CalendarFull {
 
   tileStyle(cd: ICalendarDate) {
     return 'date-tile' + ((!cd.isCurrentMonth) ? ' other-month' : '')
+      + ((DateHelper.areDatesEqual(cd.date, new Date())) ? ' today' : '')
       + (cd.isSelected ? ' selected' : '')
       + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
   }
@@ -135,6 +142,7 @@ export class CalendarFull {
         <div class="dates">
           {
             this.calendarDates.map(cd => {
+              let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
               return (
                 <div draggable={true} class={this.tileStyle(cd)}
                   onClick={() => this.dateClicked(cd)}
@@ -142,7 +150,7 @@ export class CalendarFull {
                   onDragStart={(e) => this.dragStart(e, cd)}
                   onDragEnd={() => this.dragEnd()}>
                   {(EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
-                    <div class={'more-bar' + (cd.footerHtml ? ' hasFooter' : '')}><a href="#">+{EventHelper.getDateExtendedEventsCount(cd.date, this.events)} more</a></div>
+                    <div onClick={(e) => this.moreEventsClickedHandler(e, cd.date, dateEvents)} class={'more-bar' + (cd.footerHtml ? ' hasFooter' : '')}><a href="#">+{EventHelper.getDateExtendedEventsCount(cd.date, this.events)} more</a></div>
                     : ''
                   }
                   {cd.footerHtml ?
@@ -151,8 +159,8 @@ export class CalendarFull {
                     : ''
                   }
                   <div class="content">
-                    <div>{cd.text}</div>
-                    {EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                    <div class="tile-text">{cd.text}</div>
+                    {dateEvents.map(e => {
                       if(e.ispreviousDayEvent && !e.isMonday) {
                         return '';
                       }

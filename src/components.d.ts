@@ -13,6 +13,7 @@ import {
   EventClickedEvent,
   ICalendarOptions,
   IDateFooter,
+  MoreEventsClickedEvent,
 } from './models';
 import {
   IEvent,
@@ -36,6 +37,7 @@ export namespace Components {
     'events'?: Array<IEvent>;
     'onDateSelected'?: (event: CustomEvent<DateChangedEvent>) => void;
     'onEventSelected'?: (event: CustomEvent<EventClickedEvent>) => void;
+    'onMoreEventsClicked'?: (event: CustomEvent<MoreEventsClickedEvent>) => void;
     'options'?: ICalendarOptions;
   }
 }

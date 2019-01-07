@@ -13,7 +13,6 @@ export class CalendarFull {
         this.endCalendarDate = null;
     }
     componentWillLoad() {
-        // this.initializeOptions(this.options);
         this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
         let days = moment.weekdays(true);
         days.push(days.shift());
@@ -54,6 +53,10 @@ export class CalendarFull {
         evt.stopPropagation();
         this.eventSelected.emit({ event });
     }
+    moreEventsClickedHandler(evt, date, events) {
+        evt.stopPropagation();
+        this.moreEventsClicked.emit({ events, date });
+    }
     dragStart(e, cd) {
         this.startCalendarDate = cd;
         var dragImgEl = document.createElement('span');
@@ -91,6 +94,7 @@ export class CalendarFull {
     }
     tileStyle(cd) {
         return 'date-tile' + ((!cd.isCurrentMonth) ? ' other-month' : '')
+            + ((DateHelper.areDatesEqual(cd.date, new Date())) ? ' today' : '')
             + (cd.isSelected ? ' selected' : '')
             + (this.options.weekendDays && this.options.weekendDays.indexOf(DateHelper.getWeekDay(cd.date)) >= 0 ? ' week-end' : '');
     }
@@ -103,9 +107,10 @@ export class CalendarFull {
                 return h("div", { class: "date-header-tile" }, wd);
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
+                let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
                 return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
                     (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
-                        h("div", { class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
+                        h("div", { onClick: (e) => this.moreEventsClickedHandler(e, cd.date, dateEvents), class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
                             h("a", { href: "#" },
                                 "+",
                                 EventHelper.getDateExtendedEventsCount(cd.date, this.events),
@@ -115,8 +120,8 @@ export class CalendarFull {
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
                     h("div", { class: "content" },
-                        h("div", null, cd.text),
-                        EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit()).map(e => {
+                        h("div", { class: "tile-text" }, cd.text),
+                        dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {
                                 return '';
                             }
@@ -173,6 +178,12 @@ export class CalendarFull {
         }, {
             "name": "eventSelected",
             "method": "eventSelected",
+            "bubbles": true,
+            "cancelable": true,
+            "composed": true
+        }, {
+            "name": "moreEventsClicked",
+            "method": "moreEventsClicked",
             "bubbles": true,
             "cancelable": true,
             "composed": true

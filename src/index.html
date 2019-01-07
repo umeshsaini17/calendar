@@ -56,6 +56,10 @@
       alert('Event clicked');
     });
 
+    calendar.addEventListener('moreEventsClicked', event => {
+      alert('More link clicked');
+    });
+
     function addEvent() {
       calendar.events.push(Object.assign({}, selectedEvent));
       calendar.events = [... calendar.events];
