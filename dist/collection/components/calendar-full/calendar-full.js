@@ -119,7 +119,7 @@ export class CalendarFull {
                     cd.footerHtml ?
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
-                    h("div", { class: "content" },
+                    h("div", { class: "tile-content" },
                         h("div", { class: "tile-text" }, cd.text),
                         dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {

@@ -4733,7 +4733,7 @@ class CalendarFull {
                     cd.footerHtml ?
                         h("div", { class: "footer", innerHTML: cd.footerHtml })
                         : '',
-                    h("div", { class: "content" },
+                    h("div", { class: "tile-content" },
                         h("div", { class: "tile-text" }, cd.text),
                         dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {
@@ -4802,7 +4802,7 @@ class CalendarFull {
             "cancelable": true,
             "composed": true
         }]; }
-    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.content{margin:5px;font-size:.8em}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:100px;border:1px solid #ddd}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.date-tile.week-end{background-color:#f8f8f8}.date-tile.today{background-color:#e6f2ff;color:#005dba}.date-tile.selected{background-color:#005dba;color:#fff}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:1px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer;text-overflow:ellipsis}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}.more-bar{font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.more-bar>a:active,.more-bar>a:hover,.more-bar>a:visited{color:#00f}.more-bar>a{text-decoration:none;font-weight:700;color:#00f}.more-bar.hasFooter{margin-top:68px}"; }
+    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.tile-content{margin:5px;font-size:.8em}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:100px;border:1px solid #ddd}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.date-tile.week-end{background-color:#f8f8f8}.date-tile.today{background-color:#e6f2ff;color:#005dba}.date-tile.selected{background-color:#005dba;color:#fff}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:1px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer;text-overflow:ellipsis}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}.more-bar{font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.more-bar>a:active,.more-bar>a:hover,.more-bar>a:visited{color:#00f}.more-bar>a{text-decoration:none;font-weight:700;color:#00f}.more-bar.hasFooter{margin-top:68px}"; }
 }
 
 export { CalendarFull as TeCalendarFull };

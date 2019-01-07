@@ -1,2 +1,2 @@
 // TeCalendar: Host Data, ES Module/es5 Target
-export var CalendarFull = ["te-calendar-full","udefyd2c",1,[["calendarDates",16],["currentMonth",1],["dateFooters",1],["endCalendarDate",16],["events",1],["options",2],["startCalendarDate",16]]];
+export var CalendarFull = ["te-calendar-full","5pjpxldl",1,[["calendarDates",16],["currentMonth",1],["dateFooters",1],["endCalendarDate",16],["events",1],["options",2],["startCalendarDate",16]]];

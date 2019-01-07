@@ -22,7 +22,7 @@ body {
   font-weight: bold;
 }
 
-.date-tile > .content {
+.date-tile > .tile-content {
   margin: 5px;
   font-size: .8em;
 }

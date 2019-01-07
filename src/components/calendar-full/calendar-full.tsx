@@ -158,7 +158,7 @@ export class CalendarFull {
                     </div>
                     : ''
                   }
-                  <div class="content">
+                  <div class="tile-content">
                     <div class="tile-text">{cd.text}</div>
                     {dateEvents.map(e => {
                       if(e.ispreviousDayEvent && !e.isMonday) {
