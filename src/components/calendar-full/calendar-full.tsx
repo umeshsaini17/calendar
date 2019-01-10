@@ -29,6 +29,10 @@ export class CalendarFull {
 
   componentWillLoad() {
     // this.initializeOptions(this.options);
+    this.initCalendarDates();
+  }
+
+  private initCalendarDates() {
     this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
     let days = moment.weekdays(true)
     days.push(days.shift());
@@ -47,6 +51,13 @@ export class CalendarFull {
   @Watch('options')
   optionsChanged(newVal: ICalendarOptions) {
     this.initializeOptions(newVal);
+  }
+
+  @Watch('currentMonth')
+  currentMonthChanged(newVal: Date, oldVal: Date) {
+    if(newVal.getTime() !== oldVal.getTime()) {
+      this.initCalendarDates();
+    }
   }
 
   @Watch('events')

@@ -10,10 +10,15 @@
 <body>
   <div>
     <button onclick="addEvent()">Add Event</button>
+    <button onclick="prevMonth()">Previous Month</button>
+    <button onclick="nextMonth()">Next Month</button>
+    &nbsp;
+    <span id="monthLabel"></span>
   </div>
   <te-calendar-full></te-calendar-full>
 
   <script>
+    var monthLabel = document.querySelector('#monthLabel');
 
     var calendar = document.querySelector('te-calendar-full');
     calendar.currentMonth = new Date('2019/01/01');
@@ -60,10 +65,27 @@
       alert('More link clicked');
     });
 
+    setCurrentMonthLabel();
+
     function addEvent() {
       calendar.events.push(Object.assign({}, selectedEvent));
       calendar.events = [... calendar.events];
+    }
 
+    function nextMonth() {
+      let date = new Date(calendar.currentMonth.getTime());
+      calendar.currentMonth = new Date(date.setMonth(date.getMonth() + 1));
+      setCurrentMonthLabel();
+
+    }
+    function prevMonth() {
+      let date = new Date(calendar.currentMonth.getTime());
+      calendar.currentMonth = new Date(date.setMonth(date.getMonth() - 1));
+      setCurrentMonthLabel();
+    }
+
+    function setCurrentMonthLabel() {
+      monthLabel.innerText = (calendar.currentMonth.getMonth() + 1) + '/' + calendar.currentMonth.getFullYear();
     }
   </script>
 </body>

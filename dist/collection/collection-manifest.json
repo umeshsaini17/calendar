@@ -15,7 +15,10 @@
       "props": [
         {
           "name": "currentMonth",
-          "attr": "current-month"
+          "attr": "current-month",
+          "watch": [
+            "currentMonthChanged"
+          ]
         },
         {
           "name": "dateFooters",

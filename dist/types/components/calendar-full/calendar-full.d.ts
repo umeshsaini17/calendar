@@ -15,8 +15,10 @@ export declare class CalendarFull {
     eventSelected: EventEmitter<EventClickedEvent>;
     moreEventsClicked: EventEmitter<MoreEventsClickedEvent>;
     componentWillLoad(): void;
+    private initCalendarDates;
     initializeOptions(options: ICalendarOptions): void;
     optionsChanged(newVal: ICalendarOptions): void;
+    currentMonthChanged(newVal: Date, oldVal: Date): void;
     eventsChanged(): void;
     dateClicked(date: ICalendarDate): void;
     eventClicked(evt: MouseEvent, event: IEvent): void;

@@ -4627,6 +4627,9 @@ class CalendarFull {
         this.endCalendarDate = null;
     }
     componentWillLoad() {
+        this.initCalendarDates();
+    }
+    initCalendarDates() {
         this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
         let days = hooks.weekdays(true);
         days.push(days.shift());
@@ -4642,6 +4645,11 @@ class CalendarFull {
     }
     optionsChanged(newVal) {
         this.initializeOptions(newVal);
+    }
+    currentMonthChanged(newVal, oldVal) {
+        if (newVal.getTime() !== oldVal.getTime()) {
+            this.initCalendarDates();
+        }
     }
     eventsChanged() {
         this.calendarDates = this.calendarDates.map(x => Object.assign(x, { isSelected: false }));
@@ -4759,7 +4767,8 @@ class CalendarFull {
         },
         "currentMonth": {
             "type": "Any",
-            "attr": "current-month"
+            "attr": "current-month",
+            "watchCallbacks": ["currentMonthChanged"]
         },
         "dateFooters": {
             "type": "Any",
