@@ -25,12 +25,30 @@ body {
 .date-tile > .tile-content {
   margin: 5px;
   font-size: .8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date-tile > .tile-content > .tile-text {
+  display: inline-block;
+}
+
+.date-tile > .tile-content > .tile-holiday {
+  display: inline;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.date-tile.is-holiday {
+  background-color: palegreen;
 }
 
 .date-tile {
   flex: 1 1 calc(100%/7 - 2px);
   height: 100px;
   border: 1px solid #ddd;
+  overflow: hidden;
 }
 
 .date-tile > .footer {
@@ -41,6 +59,7 @@ body {
   width: calc(100%/7 - 8px);
   margin-top: 84px;
   height: 12px;
+  color: #000;
 }
 
 .date-tile.week-end {

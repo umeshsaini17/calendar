@@ -1,5 +1,5 @@
 import { Component, State, Watch, Prop, Event, EventEmitter } from '@stencil/core';
-import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent } from '../../models';
+import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent, IHoliday } from '../../models';
 import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
 import { IEvent } from '../../models/event.model';
@@ -15,6 +15,7 @@ export class CalendarFull {
 
   @Prop() dateFooters: Array<IDateFooter> = [];
   @Prop() events: Array<IEvent> = [];
+  @Prop() holidays: Array<IHoliday> = [];
   @Prop({ mutable: true }) options: ICalendarOptions = {};
   @Prop() currentMonth: Date = new Date();
   @State() calendarDates: Array<ICalendarDate> = [];
@@ -51,6 +52,11 @@ export class CalendarFull {
   @Watch('options')
   optionsChanged(newVal: ICalendarOptions) {
     this.initializeOptions(newVal);
+  }
+
+  @Watch('dateFooters')
+  dateFootersChanged() {
+    this.initCalendarDates();
   }
 
   @Watch('currentMonth')
@@ -142,6 +148,11 @@ export class CalendarFull {
   getEventsLimit() {
     return this.dateFooters && this.dateFooters.length ? 3 : 4;
   }
+
+  getDateHoliday(date: Date): IHoliday {
+    return this.holidays.find(x => DateHelper.areDatesEqual(x.date, date));
+  }
+
   render() {
     return (
       <div>
@@ -154,8 +165,9 @@ export class CalendarFull {
           {
             this.calendarDates.map(cd => {
               let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
+              let holiday = this.getDateHoliday(cd.date);
               return (
-                <div draggable={true} class={this.tileStyle(cd)}
+                <div draggable={true} class={this.tileStyle(cd) + (holiday ? ' is-holiday' : '')}
                   onClick={() => this.dateClicked(cd)}
                   onDragOver={(e) => this.dragOver(e, cd)}
                   onDragStart={(e) => this.dragStart(e, cd)}
@@ -171,6 +183,7 @@ export class CalendarFull {
                   }
                   <div class="tile-content">
                     <div class="tile-text">{cd.text}</div>
+                    {holiday ? <div class="tile-holiday">{holiday.label}</div> : ''}
                     {dateEvents.map(e => {
                       if(e.ispreviousDayEvent && !e.isMonday) {
                         return '';

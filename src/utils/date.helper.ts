@@ -9,8 +9,10 @@ export class DateHelper {
     let mDate = moment(date);
     // let day = <WeekDayType>mDate.day();
     // let daysCount = mDate.daysInMonth();
-    let startDate = moment(date).startOf('month').day(1);
-    let endDate = moment(date).endOf('month').day(7);
+    let sm = moment(date).startOf('month');
+    let startDate = sm.day(sm.day() ? 1: -6); // If Start of Day is Sunday (0), then get startDate as this week Monday (-6)
+    let em = moment(date).endOf('month');
+    let endDate = em.day(em.day() ? 7 : 0);   // If End of Month is Sunday (0), then take that as end Date
     let month = mDate.month();
 
     let dates = this.getDateRange(startDate.toDate(), endDate.toDate());

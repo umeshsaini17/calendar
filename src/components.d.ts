@@ -13,6 +13,7 @@ import {
   EventClickedEvent,
   ICalendarOptions,
   IDateFooter,
+  IHoliday,
   MoreEventsClickedEvent,
 } from './models';
 import {
@@ -29,12 +30,14 @@ export namespace Components {
     'currentMonth': Date;
     'dateFooters': Array<IDateFooter>;
     'events': Array<IEvent>;
+    'holidays': Array<IHoliday>;
     'options': ICalendarOptions;
   }
   interface TeCalendarFullAttributes extends StencilHTMLAttributes {
     'currentMonth'?: Date;
     'dateFooters'?: Array<IDateFooter>;
     'events'?: Array<IEvent>;
+    'holidays'?: Array<IHoliday>;
     'onDateSelected'?: (event: CustomEvent<DateChangedEvent>) => void;
     'onEventSelected'?: (event: CustomEvent<EventClickedEvent>) => void;
     'onMoreEventsClicked'?: (event: CustomEvent<MoreEventsClickedEvent>) => void;

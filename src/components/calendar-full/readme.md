@@ -12,6 +12,7 @@
 | `currentMonth` | --        |             | `Date`             |
 | `dateFooters`  | --        |             | `IDateFooter[]`    |
 | `events`       | --        |             | `IEvent[]`         |
+| `holidays`     | --        |             | `IHoliday[]`       |
 | `options`      | --        |             | `ICalendarOptions` |
 
 

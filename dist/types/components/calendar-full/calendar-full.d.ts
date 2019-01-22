@@ -1,10 +1,11 @@
 import '../../stencil.core';
 import { EventEmitter } from '../../stencil.core';
-import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent } from '../../models';
+import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent, IHoliday } from '../../models';
 import { IEvent } from '../../models/event.model';
 export declare class CalendarFull {
     dateFooters: Array<IDateFooter>;
     events: Array<IEvent>;
+    holidays: Array<IHoliday>;
     options: ICalendarOptions;
     currentMonth: Date;
     calendarDates: Array<ICalendarDate>;
@@ -18,6 +19,7 @@ export declare class CalendarFull {
     private initCalendarDates;
     initializeOptions(options: ICalendarOptions): void;
     optionsChanged(newVal: ICalendarOptions): void;
+    dateFootersChanged(): void;
     currentMonthChanged(newVal: Date, oldVal: Date): void;
     eventsChanged(): void;
     dateClicked(date: ICalendarDate): void;
@@ -28,5 +30,6 @@ export declare class CalendarFull {
     dragEnd(): void;
     tileStyle(cd: ICalendarDate): string;
     getEventsLimit(): 3 | 4;
+    getDateHoliday(date: Date): IHoliday;
     render(): JSX.Element;
 }

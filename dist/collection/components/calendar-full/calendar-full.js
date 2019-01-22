@@ -6,6 +6,7 @@ export class CalendarFull {
     constructor() {
         this.dateFooters = [];
         this.events = [];
+        this.holidays = [];
         this.options = {};
         this.currentMonth = new Date();
         this.calendarDates = [];
@@ -31,6 +32,9 @@ export class CalendarFull {
     }
     optionsChanged(newVal) {
         this.initializeOptions(newVal);
+    }
+    dateFootersChanged() {
+        this.initCalendarDates();
     }
     currentMonthChanged(newVal, oldVal) {
         if (newVal.getTime() !== oldVal.getTime()) {
@@ -109,6 +113,9 @@ export class CalendarFull {
     getEventsLimit() {
         return this.dateFooters && this.dateFooters.length ? 3 : 4;
     }
+    getDateHoliday(date) {
+        return this.holidays.find(x => DateHelper.areDatesEqual(x.date, date));
+    }
     render() {
         return (h("div", null,
             h("div", { class: "header" }, this.weekDays.map(wd => {
@@ -116,7 +123,8 @@ export class CalendarFull {
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
                 let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
-                return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
+                let holiday = this.getDateHoliday(cd.date);
+                return (h("div", { draggable: true, class: this.tileStyle(cd) + (holiday ? ' is-holiday' : ''), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
                     (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
                         h("div", { onClick: (e) => this.moreEventsClickedHandler(e, cd.date, dateEvents), class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
                             h("a", { href: "#" },
@@ -129,6 +137,7 @@ export class CalendarFull {
                         : '',
                     h("div", { class: "tile-content" },
                         h("div", { class: "tile-text" }, cd.text),
+                        holiday ? h("div", { class: "tile-holiday" }, holiday.label) : '',
                         dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {
                                 return '';
@@ -158,7 +167,8 @@ export class CalendarFull {
         },
         "dateFooters": {
             "type": "Any",
-            "attr": "date-footers"
+            "attr": "date-footers",
+            "watchCallbacks": ["dateFootersChanged"]
         },
         "endCalendarDate": {
             "state": true
@@ -167,6 +177,10 @@ export class CalendarFull {
             "type": "Any",
             "attr": "events",
             "watchCallbacks": ["eventsChanged"]
+        },
+        "holidays": {
+            "type": "Any",
+            "attr": "holidays"
         },
         "options": {
             "type": "Any",

@@ -22,7 +22,10 @@
         },
         {
           "name": "dateFooters",
-          "attr": "date-footers"
+          "attr": "date-footers",
+          "watch": [
+            "dateFootersChanged"
+          ]
         },
         {
           "name": "events",
@@ -30,6 +33,10 @@
           "watch": [
             "eventsChanged"
           ]
+        },
+        {
+          "name": "holidays",
+          "attr": "holidays"
         },
         {
           "name": "options",

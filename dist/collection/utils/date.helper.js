@@ -2,8 +2,10 @@ import moment from 'moment';
 export class DateHelper {
     static getMonthDates(date, dateFooters = []) {
         let mDate = moment(date);
-        let startDate = moment(date).startOf('month').day(1);
-        let endDate = moment(date).endOf('month').day(7);
+        let sm = moment(date).startOf('month');
+        let startDate = sm.day(sm.day() ? 1 : -6);
+        let em = moment(date).endOf('month');
+        let endDate = em.day(em.day() ? 7 : 0);
         let month = mDate.month();
         let dates = this.getDateRange(startDate.toDate(), endDate.toDate());
         return dates.map(x => {

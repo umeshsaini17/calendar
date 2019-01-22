@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>Stencil Component Starter</title>
-  <script src="/build/te-calendar.js"></script>
+  <script src="build/te-calendar.js"></script>
 
 </head>
 <body>
@@ -12,6 +12,7 @@
     <button onclick="addEvent()">Add Event</button>
     <button onclick="prevMonth()">Previous Month</button>
     <button onclick="nextMonth()">Next Month</button>
+    <button onclick="loadFooters()">Load Footers</button>
     &nbsp;
     <span id="monthLabel"></span>
   </div>
@@ -37,11 +38,11 @@
       ],
       weekendDays: [6, 0]
     };
-    calendar.dateFooters = [
-      {
-        date: new Date('2019/1/15'),
-        innerHtml: '<span>09:00</span><span style="float:right;">17:00</span>'
-      }
+    calendar.holidays = [
+    {
+      date: new Date('2019/01/15'),
+      label: 'Makar Sankranti'
+    }
     ];
 
     let selectedEvent = {
@@ -86,6 +87,17 @@
 
     function setCurrentMonthLabel() {
       monthLabel.innerText = (calendar.currentMonth.getMonth() + 1) + '/' + calendar.currentMonth.getFullYear();
+    }
+
+    function loadFooters() {
+      console.log('adding footers');
+      calendar.dateFooters = [
+        {
+          date: new Date('2019/01/15'),
+          innerHtml: '<span>09:00</span><span style="float:right;">17:00</span>'
+        }
+      ];
+      console.log(calendar.dateFooters);
     }
   </script>
 </body>

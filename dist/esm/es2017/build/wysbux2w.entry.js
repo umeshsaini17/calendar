@@ -4505,8 +4505,10 @@ hooks.HTML5_FMT = {
 class DateHelper {
     static getMonthDates(date, dateFooters = []) {
         let mDate = hooks(date);
-        let startDate = hooks(date).startOf('month').day(1);
-        let endDate = hooks(date).endOf('month').day(7);
+        let sm = hooks(date).startOf('month');
+        let startDate = sm.day(sm.day() ? 1 : -6);
+        let em = hooks(date).endOf('month');
+        let endDate = em.day(em.day() ? 7 : 0);
         let month = mDate.month();
         let dates = this.getDateRange(startDate.toDate(), endDate.toDate());
         return dates.map(x => {
@@ -4620,6 +4622,7 @@ class CalendarFull {
     constructor() {
         this.dateFooters = [];
         this.events = [];
+        this.holidays = [];
         this.options = {};
         this.currentMonth = new Date();
         this.calendarDates = [];
@@ -4645,6 +4648,9 @@ class CalendarFull {
     }
     optionsChanged(newVal) {
         this.initializeOptions(newVal);
+    }
+    dateFootersChanged() {
+        this.initCalendarDates();
     }
     currentMonthChanged(newVal, oldVal) {
         if (newVal.getTime() !== oldVal.getTime()) {
@@ -4723,6 +4729,9 @@ class CalendarFull {
     getEventsLimit() {
         return this.dateFooters && this.dateFooters.length ? 3 : 4;
     }
+    getDateHoliday(date) {
+        return this.holidays.find(x => DateHelper.areDatesEqual(x.date, date));
+    }
     render() {
         return (h("div", null,
             h("div", { class: "header" }, this.weekDays.map(wd => {
@@ -4730,7 +4739,8 @@ class CalendarFull {
             })),
             h("div", { class: "dates" }, this.calendarDates.map(cd => {
                 let dateEvents = EventHelper.getDateEvents(cd.date, this.events, this.getEventsLimit());
-                return (h("div", { draggable: true, class: this.tileStyle(cd), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
+                let holiday = this.getDateHoliday(cd.date);
+                return (h("div", { draggable: true, class: this.tileStyle(cd) + (holiday ? ' is-holiday' : ''), onClick: () => this.dateClicked(cd), onDragOver: (e) => this.dragOver(e, cd), onDragStart: (e) => this.dragStart(e, cd), onDragEnd: () => this.dragEnd() },
                     (EventHelper.getDateExtendedEventsCount(cd.date, this.events, this.getEventsLimit()) >= 1) ?
                         h("div", { onClick: (e) => this.moreEventsClickedHandler(e, cd.date, dateEvents), class: 'more-bar' + (cd.footerHtml ? ' hasFooter' : '') },
                             h("a", { href: "#" },
@@ -4743,6 +4753,7 @@ class CalendarFull {
                         : '',
                     h("div", { class: "tile-content" },
                         h("div", { class: "tile-text" }, cd.text),
+                        holiday ? h("div", { class: "tile-holiday" }, holiday.label) : '',
                         dateEvents.map(e => {
                             if (e.ispreviousDayEvent && !e.isMonday) {
                                 return '';
@@ -4772,7 +4783,8 @@ class CalendarFull {
         },
         "dateFooters": {
             "type": "Any",
-            "attr": "date-footers"
+            "attr": "date-footers",
+            "watchCallbacks": ["dateFootersChanged"]
         },
         "endCalendarDate": {
             "state": true
@@ -4781,6 +4793,10 @@ class CalendarFull {
             "type": "Any",
             "attr": "events",
             "watchCallbacks": ["eventsChanged"]
+        },
+        "holidays": {
+            "type": "Any",
+            "attr": "holidays"
         },
         "options": {
             "type": "Any",
@@ -4811,7 +4827,7 @@ class CalendarFull {
             "cancelable": true,
             "composed": true
         }]; }
-    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.tile-content{margin:5px;font-size:.8em}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:100px;border:1px solid #ddd}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.date-tile.week-end{background-color:#f8f8f8}.date-tile.today{background-color:#e6f2ff;color:#005dba}.date-tile.selected{background-color:#005dba;color:#fff}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:1px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer;text-overflow:ellipsis}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}.more-bar{font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.more-bar>a:active,.more-bar>a:hover,.more-bar>a:visited{color:#00f}.more-bar>a{text-decoration:none;font-weight:700;color:#00f}.more-bar.hasFooter{margin-top:68px}"; }
+    static get style() { return "body{font-family:Arial;font-size:14px}.dates{-ms-flex-flow:row wrap;flex-flow:row wrap}.dates,.header{display:-ms-flexbox;display:flex}.header{text-align:center}.date-header-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);border:1px solid #ddd;padding:5px;font-size:.7em;text-transform:uppercase;font-weight:700}.date-tile>.tile-content{margin:5px;font-size:.8em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.date-tile>.tile-content>.tile-text{display:inline-block}.date-tile>.tile-content>.tile-holiday{display:inline;font-weight:700;margin-left:5px}.date-tile.is-holiday{background-color:#98fb98}.date-tile{-ms-flex:1 1 calc(100%/7 - 2px);flex:1 1 calc(100%/7 - 2px);height:100px;border:1px solid #ddd;overflow:hidden}.date-tile>.footer{background-color:#eee;font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px;color:#000}.date-tile.week-end{background-color:#f8f8f8}.date-tile.today{background-color:#e6f2ff;color:#005dba}.date-tile.selected{background-color:#005dba;color:#fff}.date-tile.other-month{color:#aaa}.event-bar{background-color:#eee;padding:1px 3px;white-space:nowrap;position:absolute;margin-top:1px;border:1px solid #dadada;border-left:5px solid grey;overflow:hidden;cursor:pointer;text-overflow:ellipsis}.event-bar>.label{font-weight:700;margin-right:5px}.event-bar>.desc{font-size:.9em}.more-bar{font-size:.8em;padding:2px;position:absolute;width:calc(100%/7 - 8px);margin-top:84px;height:12px}.more-bar>a:active,.more-bar>a:hover,.more-bar>a:visited{color:#00f}.more-bar>a{text-decoration:none;font-weight:700;color:#00f}.more-bar.hasFooter{margin-top:68px}"; }
 }
 
 export { CalendarFull as TeCalendarFull };
