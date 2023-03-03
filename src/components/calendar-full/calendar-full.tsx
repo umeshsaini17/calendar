@@ -1,4 +1,4 @@
-import { Component, State, Watch, Prop, Event, EventEmitter } from '@stencil/core';
+import { Component, State, Watch, Prop, Event, EventEmitter, h } from '@stencil/core';
 import { ICalendarDate, ICalendarOptions, DateChangedEvent, IDateFooter, EventClickedEvent, MoreEventsClickedEvent, IHoliday } from '../../models';
 import { DateHelper } from '../../utils/date.helper';
 import moment from 'moment';
@@ -8,19 +8,18 @@ import { EventHelper } from '../../utils/event.helper';
 
 @Component({
   tag: 'te-calendar-full',
-  styleUrl: 'calendar-full.css',
+  styleUrl: 'calendar-full.scss',
   shadow: false
 })
 export class CalendarFull {
 
-  @Prop() dateFooters: Array<IDateFooter> = [];
-  @Prop() events: Array<IEvent> = [];
-  @Prop() holidays: Array<IHoliday> = [];
+  @Prop() dateFooters: IDateFooter[] = [];
+  @Prop() events: IEvent[] = [];
+  @Prop() holidays: IHoliday[] = [];
   @Prop({ mutable: true }) options: ICalendarOptions = {};
   @Prop() currentMonth: Date = new Date();
-  @State() calendarDates: Array<ICalendarDate> = [];
-  weekDays: Array<string>;
 
+  @State() calendarDates: ICalendarDate[] = [];
   @State() startCalendarDate: ICalendarDate = null;
   @State() endCalendarDate: ICalendarDate = null;
 
@@ -28,16 +27,10 @@ export class CalendarFull {
   @Event() eventSelected: EventEmitter<EventClickedEvent>;
   @Event() moreEventsClicked: EventEmitter<MoreEventsClickedEvent>;
 
-  componentWillLoad() {
-    // this.initializeOptions(this.options);
-    this.initCalendarDates();
-  }
+  weekDays: string[];
 
-  private initCalendarDates() {
-    this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
-    let days = moment.weekdays(true)
-    days.push(days.shift());
-    this.weekDays = days;
+  componentWillLoad() {
+    this.initCalendarDates();
   }
 
   initializeOptions(options: ICalendarOptions) {
@@ -46,7 +39,6 @@ export class CalendarFull {
       weekendDays: [WeekDayType.Saturday, WeekDayType.Sunday],
       eventTypeLegends: []
     }, options);
-    console.log(this.options);
   }
 
   @Watch('options')
@@ -77,7 +69,6 @@ export class CalendarFull {
         x.isSelected = !x.isSelected;
         this.startCalendarDate = this.endCalendarDate = x;
         if (x.isSelected) {
-          console.log('dateClicked - ' + x.date);
           this.dateSelected.emit({ startDate: x.date, endDate: x.date });
         }
       } else if (!this.options.allowMultiRangeSelect) {
@@ -93,7 +84,7 @@ export class CalendarFull {
     this.eventSelected.emit({ event });
   }
 
-  moreEventsClickedHandler(evt: MouseEvent, date: Date, events: Array<IEvent>) {
+  moreEventsClickedHandler(evt: MouseEvent, date: Date, events: IEvent[]) {
     evt.stopPropagation();
     this.moreEventsClicked.emit({ events, date });
   }
@@ -133,7 +124,6 @@ export class CalendarFull {
     let first = selectedDates.shift();
     let last = selectedDates.pop();
     if (first && last) {
-      console.log('dragEnd - ' + first.date);
       this.dateSelected.emit({ startDate: first.date, endDate: last.date });
     }
   }
@@ -210,5 +200,12 @@ export class CalendarFull {
         </div>
       </div>
     );
+  }
+
+  private initCalendarDates() {
+    this.calendarDates = DateHelper.getMonthDates(this.currentMonth, this.dateFooters);
+    let days = moment.weekdays(true)
+    days.push(days.shift());
+    this.weekDays = days;
   }
 }

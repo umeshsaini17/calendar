@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
   <title>Stencil Component Starter</title>
-  <script src="build/te-calendar.js"></script>
+  <script type="module" src="/build/te-calendar.esm.js"></script>
+  <script nomodule src="/build/te-calendar.js"></script>
 
 </head>
 <body>
@@ -22,7 +23,7 @@
     var monthLabel = document.querySelector('#monthLabel');
 
     var calendar = document.querySelector('te-calendar-full');
-    calendar.currentMonth = new Date('2019/01/01');
+    calendar.currentMonth = new Date();
     calendar.options = {
       eventTypeLegends: [
         {
@@ -90,14 +91,12 @@
     }
 
     function loadFooters() {
-      console.log('adding footers');
       calendar.dateFooters = [
         {
           date: new Date('2019/01/15'),
           innerHtml: '<span>09:00</span><span style="float:right;">17:00</span>'
         }
       ];
-      console.log(calendar.dateFooters);
     }
   </script>
 </body>

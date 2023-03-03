@@ -2,8 +2,8 @@ import { WeekDayType } from "../enums";
 
 export interface ICalendarOptions {
   allowMultiRangeSelect?: boolean;
-  weekendDays?: Array<WeekDayType>;
-  eventTypeLegends?: Array<IEventTypeLegend>;
+  weekendDays?: WeekDayType[];
+  eventTypeLegends?: IEventTypeLegend[];
 }
 
 export interface IEventTypeLegend {

@@ -2,9 +2,8 @@
   "name": "@3eq/calendar",
   "version": "1.0.9",
   "description": "Full calendar components with events management.",
-  "module": "dist/esm/index.js",
-  "main": "dist/index.js",
-  "unpkg": "dist/ionic.js",
+  "module": "./dist/index.js",
+  "main": "./dist/index.cjs.js",
   "types": "dist/types/components.d.ts",
   "collection": "dist/collection/collection-manifest.json",
   "files": [
@@ -17,10 +16,11 @@
     "test.watch": "stencil test --spec --e2e --watchAll"
   },
   "dependencies": {
-    "moment": "^2.23.0"
+    "@stencil/sass": "^3.0.0",
+    "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@stencil/core": "~0.15.2"
+    "@stencil/core": "^3.1.0"
   },
   "author": {
     "name": "Umesh Saini"

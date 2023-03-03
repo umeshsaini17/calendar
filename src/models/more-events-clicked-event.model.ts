@@ -1,6 +1,6 @@
 import { IEvent } from "./event.model";
 
 export interface MoreEventsClickedEvent {
-  events: Array<IEvent>;
+  events: IEvent[];
   date: Date;
 }

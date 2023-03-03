@@ -7,22 +7,22 @@
 
 ## Properties
 
-| Property       | Attribute | Description | Type               |
-| -------------- | --------- | ----------- | ------------------ |
-| `currentMonth` | --        |             | `Date`             |
-| `dateFooters`  | --        |             | `IDateFooter[]`    |
-| `events`       | --        |             | `IEvent[]`         |
-| `holidays`     | --        |             | `IHoliday[]`       |
-| `options`      | --        |             | `ICalendarOptions` |
+| Property       | Attribute | Description | Type               | Default      |
+| -------------- | --------- | ----------- | ------------------ | ------------ |
+| `currentMonth` | --        |             | `Date`             | `new Date()` |
+| `dateFooters`  | --        |             | `IDateFooter[]`    | `[]`         |
+| `events`       | --        |             | `IEvent[]`         | `[]`         |
+| `holidays`     | --        |             | `IHoliday[]`       | `[]`         |
+| `options`      | --        |             | `ICalendarOptions` | `{}`         |
 
 
 ## Events
 
-| Event               | Detail                 | Description |
-| ------------------- | ---------------------- | ----------- |
-| `dateSelected`      | DateChangedEvent       |             |
-| `eventSelected`     | EventClickedEvent      |             |
-| `moreEventsClicked` | MoreEventsClickedEvent |             |
+| Event               | Description | Type                                  |
+| ------------------- | ----------- | ------------------------------------- |
+| `dateSelected`      |             | `CustomEvent<DateChangedEvent>`       |
+| `eventSelected`     |             | `CustomEvent<EventClickedEvent>`      |
+| `moreEventsClicked` |             | `CustomEvent<MoreEventsClickedEvent>` |
 
 
 ----------------------------------------------

@@ -1,1 +1,0 @@
-// TeCalendar: CommonJS Main

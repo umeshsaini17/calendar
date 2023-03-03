@@ -1,19 +1,14 @@
-import { Config } from '@stencil/core';
+import { Config } from "@stencil/core";
+import { sass } from "@stencil/sass";
 
 export const config: Config = {
-  namespace: 'te-calendar',
-  outputTargets:[
-    { type: 'dist' },
-    { type: 'docs' },
+  namespace: "te-calendar",
+  plugins: [sass()],
+  outputTargets: [
+    { type: "dist" },
     {
-      type: 'www',
-      serviceWorker: null // disable service workers
-    }
+      type: "www",
+      serviceWorker: null, // disable service workers
+    },
   ],
-  copy: [
-      {
-          src: 'index.html',
-          dest: 'index.html'
-      }
-  ]
 };
